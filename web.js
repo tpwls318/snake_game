@@ -17,9 +17,15 @@ const showMessage = ({ pause, gameover }, t0) => {
     message = `Your final score :${score}
 press space to restart`;
   } else if(pause){
-    color = 'darkblue';
     fontSize = '24px';
-    message = t0 ? `Your score :${score}` : 'press space to start';
+    if(!t0){
+      message = 'press space to start';
+      draw();
+    } else {
+      color = 'darkblue';
+      message = `Your score :${score}`;
+    }
+    
   } else {
     fontSize = '16px';
     message = 'press space to pause';
