@@ -1,22 +1,39 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
+const backgroundColor = '#383838';
 let padding;
 let state = initialState();
-let last_score;
+let final_score;
 let apple = document.getElementById("apple");
-apple.style.visibility = 'hidden';
 const x = p => p * canvas.width / state.col;
 const y = p => p * canvas.height / state.row;
-const getMessage = start => start ? 'press space to start' : `Your score :${last_score || state.snake.length}`
-const showMessage = (pause, t0) => {
-  document.getElementById('message').innerHTML = pause ? getMessage(!t0) : 'press space to pause';
+const showMessage = ({ pause, gameover }, t0) => {
+  let message = '';
+  let score = final_score || state.snake.length;
+  let fontSize = '';
+  color = 'yellow';
+  if(gameover) {
+    fontSize = '20px';
+    message = `Your final score :${score}
+press space to restart`;
+  } else if(pause){
+    color = 'darkblue';
+    fontSize = '24px';
+    message = t0 ? `Your score :${score}` : 'press space to start';
+  } else {
+    fontSize = '16px';
+    message = 'press space to pause';
+  }
+  document.getElementById('message').style.color = color;
+  document.getElementById('message').style.fontSize = fontSize;
+  document.getElementById('message').innerHTML = message;
 }
 const draw = () => {
-  // init last score
-  last_score = 0;
+  // init final score
+  final_score = 0;
 
   // bgc
-  ctx.fillStyle = '#94949c';
+  ctx.fillStyle = backgroundColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   
   // snake
@@ -35,17 +52,18 @@ const draw = () => {
       ctx.fillStyle = 'rgb(255, 40, 40)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       window.setTimeout(() => {
-        ctx.fillStyle = '#94949c';
+        ctx.fillStyle = backgroundColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }, 100);
-      last_score = state.snake.length;
+      final_score = state.snake.length;
       state = initialState();
+      state.gameover = true;
       break;
     }
   }
 }
 const step = t0 => t1 => {
-  showMessage(state.pause, t0);
+  showMessage(state, t0);
   if(state.pause || t1 - t0 < 100 - state.snake.length * 2) {
     window.requestAnimationFrame(step(t0));
   } else {
@@ -61,7 +79,10 @@ window.addEventListener('keydown', e => {
     case 'a': case 'ArrowLeft':  state = enqueueMove(state, WEST); break;
     case 's': case 'ArrowDown':  state = enqueueMove(state, SOUTH); break;
     case 'd': case 'ArrowRight': state = enqueueMove(state, EAST); break;
-    case ' ': case 'Escape': state = togglePause(state); break;
+    case ' ': case 'Escape':
+      state = togglePause(state);
+      document.getElementById('message').style.backgroundColor = state.pause ? '#bbbbbb' : 'transparent';
+      break;
   }
 })
 

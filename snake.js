@@ -9,7 +9,7 @@ const getDistance = (p1, p2) => Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1
 const randPos = ({ col, row }) => ({ x: Math.floor(Math.random() * col), y: Math.floor(Math.random() * row) });
 const randApplePos = state => {
   let rand_pos = randPos(state);
-  if(!state.snake.reduce((acc, v) => getDistance(v, rand_pos) < 3 ? false : acc), true){
+  if(!state.snake.reduce((acc, v) => acc ? getDistance(v, rand_pos) > 3 : acc), true){
     rand_pos = randPos(state);
   }
   return rand_pos;
@@ -27,10 +27,11 @@ const nextMoves = ({ moves }) => moves.length == 1 ? moves : moves.slice(1);
 const initialState = () => ({
   col: col_length,
   row: row_length,
-  snake: [{ x: 2, y: 2 }],
+  snake: [{ x: 4, y: 2 }, { x: 3, y: 2 }, { x: 2, y: 2 }],
   apple: { x: col_length - 3, y: 2 },
   moves: [EAST],
   pause: true,
+  gameover: false,
 })
 const next = spec({
   col: x => x.col,
@@ -39,8 +40,9 @@ const next = spec({
   apple: nextApple,
   moves: nextMoves,
   pause: x => x.pause,
+  gameover: x => x.gameover,
 })
-const togglePause = (prev_state) => ({ ...prev_state, pause: !prev_state.pause })
+const togglePause = (prev_state) => ({ ...prev_state, pause: !prev_state.pause, gameover: prev_state.gameover && false })
 const enqueueMove = (prev_state, dir) => (
   invalidMove(prev_state.moves, dir)
     ? prev_state
